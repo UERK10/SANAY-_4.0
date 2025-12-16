@@ -3,481 +3,531 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EnergySense AI | Industrial Optimization Platform</title>
-    
-    <!-- Tailwind CSS for styling -->
+    <title>EnergySense AI | Enterprise Dashboard</title>
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Chart.js for Data Visualization -->
+
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- FontAwesome for Industrial Icons -->
+
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts: Inter (Professional/Clean) -->
+
+    <!-- Google Fonts: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9; /* Slate-100 */
+            background-color: #f1f5f9;
         }
-        
-        /* Custom Scrollbar for Tables */
+
+        /* Custom Scrollbar */
         .scroller::-webkit-scrollbar {
             width: 6px;
             height: 6px;
         }
+
         .scroller::-webkit-scrollbar-track {
-            background: #e2e8f0; 
+            background: #e2e8f0;
         }
+
         .scroller::-webkit-scrollbar-thumb {
-            background: #94a3b8; 
+            background: #94a3b8;
             border-radius: 3px;
         }
-        
-        /* Industrial Card Styling */
+
+        /* Industrial Card */
         .industrial-card {
             background: white;
             border: 1px solid #e2e8f0;
-            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
         }
 
-        .status-dot {
-            height: 10px;
-            width: 10px;
-            border-radius: 50%;
-            display: inline-block;
+        /* Navigation Active State */
+        .nav-item.active {
+            background-color: #334155; /* Slate-700 */
+            color: #ffffff;
+            border-left: 3px solid #3b82f6; /* Blue-500 */
+        }
+
+        .nav-item {
+            border-left: 3px solid transparent;
+        }
+
+        /* Page Transitions */
+        .page-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+            .page-section.active {
+                display: block;
+            }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
 <body class="text-slate-800 h-screen flex flex-col overflow-hidden">
 
-    <!-- TOP NAVIGATION BAR -->
-    <header class="bg-slate-900 text-white h-16 flex items-center justify-between px-6 shadow-md z-10">
+    <!-- HEADER -->
+    <header class="bg-slate-900 text-white h-16 flex items-center justify-between px-6 shadow-md z-10 shrink-0">
         <div class="flex items-center gap-4">
             <div class="bg-blue-600 p-1.5 rounded text-xs font-bold tracking-widest">ES-AI</div>
             <h1 class="text-lg font-semibold tracking-wide flex items-center">
-                EnergySense <span class="text-blue-400 font-light mx-1">AI</span> 
-                <span class="text-slate-500 text-sm ml-2 border-l border-slate-700 pl-2">Plant Manager View v2.4</span>
-                <!-- STRATEJİK DEĞİŞİKLİK 2: Simulation Mode Etiketi -->
+                EnergySense <span class="text-blue-400 font-light mx-1">AI</span>
+                <span class="text-slate-500 text-sm ml-2 border-l border-slate-700 pl-2">Enterprise v3.0</span>
                 <span class="text-[10px] font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-600/50 px-2 py-0.5 rounded ml-3 uppercase tracking-wider">
                     <i class="fa-solid fa-flask text-[9px] mr-1"></i> Simulation Mode
                 </span>
             </h1>
         </div>
-        
         <div class="flex items-center gap-6 text-sm">
             <div class="flex items-center gap-2">
-                <span class="text-slate-400">System Status:</span>
+                <span class="text-slate-400">Status:</span>
                 <span class="flex items-center gap-1 text-green-400 font-medium">
-                    <span class="status-dot bg-green-400 animate-pulse"></span> OPERATIONAL
+                    <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span> ONLINE
                 </span>
             </div>
             <div class="flex items-center gap-2">
-                <span class="text-slate-400">Last Sync:</span>
-                <span id="last-sync" class="font-mono">14:05:22</span>
+                <span class="text-slate-400">Sync:</span>
+                <span id="clock" class="font-mono text-slate-200">--:--:--</span>
             </div>
             <div class="border-l border-slate-700 h-6 mx-2"></div>
-            <div class="flex items-center gap-3">
-                <i class="fa-solid fa-bell text-slate-400 hover:text-white cursor-pointer relative">
-                    <span class="absolute -top-2 -right-1 bg-red-600 text-[10px] w-4 h-4 flex items-center justify-center rounded-full">3</span>
-                </i>
-                <i class="fa-solid fa-user-gear text-slate-400 hover:text-white cursor-pointer"></i>
-            </div>
+            <i class="fa-solid fa-bell text-slate-400 hover:text-white cursor-pointer relative">
+                <span class="absolute -top-1.5 -right-1 bg-red-600 text-[9px] px-1 rounded-full">3</span>
+            </i>
         </div>
     </header>
 
     <div class="flex flex-1 overflow-hidden">
-        
-        <!-- SIDEBAR -->
-        <aside class="w-64 bg-slate-800 text-slate-300 flex flex-col shadow-inner">
-            <div class="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Main Control</div>
-            <nav class="flex-1 space-y-1 px-2">
-                <a href="#" class="flex items-center gap-3 px-3 py-2 bg-slate-700 text-white rounded transition-colors group">
-                    <i class="fa-solid fa-chart-line w-5 text-blue-400"></i>
-                    <span class="font-medium">Overview</span>
-                </a>
-                <a href="#" class="flex items-center gap-3 px-3 py-2 hover:bg-slate-700 hover:text-white rounded transition-colors group">
-                    <i class="fa-solid fa-industry w-5"></i>
-                    <span>Production Line A</span>
-                </a>
-                <a href="#" class="flex items-center gap-3 px-3 py-2 hover:bg-slate-700 hover:text-white rounded transition-colors group">
-                    <i class="fa-solid fa-industry w-5"></i>
-                    <span>Production Line B</span>
-                </a>
-                <a href="#" class="flex items-center gap-3 px-3 py-2 hover:bg-slate-700 hover:text-white rounded transition-colors group">
-                    <i class="fa-solid fa-bolt w-5"></i>
-                    <span>Peak Analysis</span>
-                </a>
-                <a href="#" class="flex items-center gap-3 px-3 py-2 hover:bg-slate-700 hover:text-white rounded transition-colors group">
-                    <i class="fa-solid fa-robot w-5 text-purple-400"></i>
-                    <span>AI Diagnostics</span>
-                </a>
+
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="w-64 bg-slate-800 text-slate-300 flex flex-col shadow-inner shrink-0">
+            <div class="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Dashboards</div>
+            <nav class="flex-1 space-y-1">
+                <button onclick="switchPage('overview')" id="nav-overview" class="nav-item w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-700 hover:text-white transition-colors active text-left">
+                    <i class="fa-solid fa-gauge-high w-5 text-center"></i> Overview
+                </button>
+                <button onclick="switchPage('line-a')" id="nav-line-a" class="nav-item w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-700 hover:text-white transition-colors text-left">
+                    <i class="fa-solid fa-industry w-5 text-center"></i> Production Line A
+                </button>
+                <button onclick="switchPage('line-b')" id="nav-line-b" class="nav-item w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-700 hover:text-white transition-colors text-left">
+                    <i class="fa-solid fa-industry w-5 text-center"></i> Production Line B
+                </button>
+
+                <div class="p-4 pb-1 text-xs font-bold text-slate-500 uppercase tracking-wider mt-4">Analytics</div>
+                <button onclick="switchPage('peak')" id="nav-peak" class="nav-item w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-700 hover:text-white transition-colors text-left">
+                    <i class="fa-solid fa-chart-simple w-5 text-center"></i> Peak Analysis
+                </button>
+                <button onclick="switchPage('ai')" id="nav-ai" class="nav-item w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-700 hover:text-white transition-colors text-left">
+                    <i class="fa-solid fa-microchip w-5 text-center text-purple-400"></i> AI Diagnostics
+                </button>
+                <button onclick="switchPage('history')" id="nav-history" class="nav-item w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-700 hover:text-white transition-colors text-left">
+                    <i class="fa-solid fa-table-list w-5 text-center"></i> Historical Data
+                </button>
             </nav>
-            <div class="p-4 border-t border-slate-700">
-                <div class="text-xs text-slate-500 mb-2">FACTORY EFFICIENCY SCORE</div>
-                <div class="flex items-end gap-2">
-                    <span class="text-2xl font-bold text-white">87%</span>
-                    <span class="text-xs text-green-400 mb-1">▲ 2.4%</span>
-                </div>
-                <div class="w-full bg-slate-700 h-1.5 mt-2 rounded-full">
-                    <div class="bg-blue-500 h-1.5 rounded-full" style="width: 87%"></div>
+            <div class="p-4 border-t border-slate-700 bg-slate-900/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded bg-slate-700 flex items-center justify-center text-white font-bold text-xs">PM</div>
+                    <div class="leading-tight">
+                        <div class="text-xs font-bold text-white">Plant Manager</div>
+                        <div class="text-[10px] text-slate-500">Sector 4 Admin</div>
+                    </div>
                 </div>
             </div>
         </aside>
 
-        <!-- MAIN CONTENT -->
-        <main class="flex-1 p-6 overflow-y-auto scroller">
-            
-            <!-- HEADER SECTION -->
-            <div class="flex justify-between items-end mb-6">
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-800">Energy Consumption Overview</h2>
-                    <!-- STRATEJİK DEĞİŞİKLİK 1: AI Tanımını Yumuşatma -->
-                    <p class="text-sm text-slate-500 mt-1">
-                        Real-time telemetry for Sector 4.
-                        <span class="block text-slate-400 text-xs mt-0.5 italic">
-                            * AI-supported statistical analysis based on historical energy patterns.
-                        </span>
-                    </p>
-                </div>
-                <div class="flex gap-2">
-                    <button class="px-4 py-2 bg-white border border-slate-300 text-slate-700 text-sm font-medium rounded hover:bg-slate-50 shadow-sm">
-                        <i class="fa-solid fa-download mr-2"></i> Export Report
-                    </button>
-                    <button onclick="simulateNewData()" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 shadow-sm flex items-center">
-                        <i class="fa-solid fa-arrows-rotate mr-2"></i> Refresh Data
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 p-6 overflow-y-auto scroller bg-slate-50 relative">
+
+            <!-- 1. OVERVIEW SECTION -->
+            <section id="page-overview" class="page-section active">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800">Facility Overview</h2>
+                        <p class="text-sm text-slate-500 mt-1">Real-time aggregate energy metrics.</p>
+                        <p class="text-[10px] text-slate-400 mt-1 italic">* AI-supported statistical analysis based on historical patterns.</p>
+                    </div>
+                    <button class="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 shadow-sm" onclick="alert('Report generated')">
+                        <i class="fa-solid fa-file-export mr-2"></i> Export Report
                     </button>
                 </div>
-            </div>
 
-            <!-- KPI CARDS -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <!-- Card 1 -->
-                <div class="industrial-card p-4 rounded border-l-4 border-blue-500">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs font-bold text-slate-500 uppercase">Current Load</p>
-                            <h3 class="text-2xl font-bold text-slate-800 mt-1 font-mono">452.8 <span class="text-sm text-slate-500">kW</span></h3>
-                        </div>
-                        <div class="p-2 bg-blue-50 text-blue-600 rounded">
-                            <i class="fa-solid fa-bolt"></i>
-                        </div>
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="industrial-card p-4 rounded border-l-4 border-blue-600">
+                        <div class="text-xs font-bold text-slate-500 uppercase">Total Load</div>
+                        <div class="text-2xl font-bold text-slate-800 mt-1 font-mono">452.8 kW</div>
+                        <div class="text-xs text-slate-400 mt-2">Running nominal</div>
                     </div>
-                    <p class="text-xs text-slate-500 mt-2">Running within nominal range</p>
-                </div>
-
-                <!-- Card 2 -->
-                <div class="industrial-card p-4 rounded border-l-4 border-purple-500">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs font-bold text-slate-500 uppercase">AI Predicted Peak</p>
-                            <h3 class="text-2xl font-bold text-slate-800 mt-1 font-mono">14:45 <span class="text-sm text-slate-500">hrs</span></h3>
-                        </div>
-                        <div class="p-2 bg-purple-50 text-purple-600 rounded">
-                            <i class="fa-solid fa-brain"></i>
-                        </div>
+                    <div class="industrial-card p-4 rounded border-l-4 border-purple-500">
+                        <div class="text-xs font-bold text-slate-500 uppercase">AI Predicted Peak</div>
+                        <div class="text-2xl font-bold text-slate-800 mt-1 font-mono">14:45 <span class="text-sm text-slate-400">hrs</span></div>
+                        <div class="text-xs text-purple-600 mt-2 font-medium">Probability > 90%</div>
                     </div>
-                    <p class="text-xs text-purple-700 mt-2 font-medium">Warning: High probability > 90%</p>
-                </div>
-
-                <!-- Card 3 -->
-                <div class="industrial-card p-4 rounded border-l-4 border-green-500 relative overflow-hidden">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs font-bold text-slate-500 uppercase">Daily Savings</p>
-                            <h3 class="text-2xl font-bold text-slate-800 mt-1 font-mono">$1,240 <span class="text-sm text-slate-500">est</span></h3>
-                        </div>
-                        <div class="p-2 bg-green-50 text-green-600 rounded">
-                            <i class="fa-solid fa-leaf"></i>
-                        </div>
+                    <div class="industrial-card p-4 rounded border-l-4 border-green-500">
+                        <div class="text-xs font-bold text-slate-500 uppercase">Efficiency Savings</div>
+                        <div class="text-2xl font-bold text-slate-800 mt-1 font-mono">$1,240 <span class="text-sm text-slate-400">/day</span></div>
+                        <div class="text-xs text-green-600 mt-2 font-bold">Est. Monthly Reduction: 12-18%</div>
                     </div>
-                    <!-- STRATEJİK DEĞİŞİKLİK 3: ROI Tahmini -->
-                    <div class="mt-2 pt-2 border-t border-slate-100">
-                        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-tight">Est. Monthly Cost Reduction</p>
-                        <p class="text-sm font-bold text-green-600">12% – 18%</p>
+                    <div class="industrial-card p-4 rounded border-l-4 border-slate-500">
+                        <div class="text-xs font-bold text-slate-500 uppercase">Power Factor</div>
+                        <div class="text-2xl font-bold text-slate-800 mt-1 font-mono">0.98</div>
+                        <div class="text-xs text-slate-400 mt-2">Reactive power optimal</div>
                     </div>
                 </div>
 
-                <!-- Card 4 -->
-                <div class="industrial-card p-4 rounded border-l-4 border-slate-500">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs font-bold text-slate-500 uppercase">Power Factor</p>
-                            <h3 class="text-2xl font-bold text-slate-800 mt-1 font-mono">0.98</h3>
-                        </div>
-                        <div class="p-2 bg-slate-100 text-slate-600 rounded">
-                            <i class="fa-solid fa-gauge-high"></i>
-                        </div>
+                <!-- Main Chart -->
+                <div class="industrial-card p-5 rounded h-96">
+                    <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-area text-slate-400"></i> Main Consumption Trend (Last 8 Hours)
+                    </h3>
+                    <div class="h-full pb-8">
+                        <canvas id="overviewChart"></canvas>
                     </div>
-                    <p class="text-xs text-slate-500 mt-2">Reactive power compensated</p>
                 </div>
-            </div>
+            </section>
 
-            <!-- MAIN CHART SECTION -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                <!-- Large Chart -->
-                <div class="lg:col-span-2 industrial-card p-5 rounded">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-slate-700 flex items-center gap-2">
-                            <i class="fa-solid fa-chart-area text-slate-400"></i> Real-Time Consumption Analysis
-                        </h3>
-                        <div class="flex gap-2 text-xs">
-                            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-blue-500 rounded-sm"></span> Actual</span>
-                            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-purple-400 rounded-sm border border-dashed border-slate-600"></span> AI Baseline</span>
+            <!-- 2. PRODUCTION LINE A -->
+            <section id="page-line-a" class="page-section">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-2xl font-bold text-slate-800">Production Line A</h2>
+                            <span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-bold rounded border border-green-200">RUNNING</span>
                         </div>
-                    </div>
-                    <div class="relative h-72 w-full">
-                        <canvas id="energyChart"></canvas>
-                        <!-- AI Insight Overlay -->
-                        <div class="absolute top-2 right-2 bg-white/90 border border-purple-200 p-2 rounded shadow-sm backdrop-blur-sm text-xs max-w-[200px]">
-                            <div class="font-bold text-purple-700 mb-1"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Insight</div>
-                            <p class="text-slate-600 leading-tight">Anomaly detected at 10:45. Pattern matches "Compressor Valve Leak". Recommended inspection.</p>
-                        </div>
+                        <p class="text-sm text-slate-500 mt-1">Automotive Assembly Unit - Zone 1</p>
                     </div>
                 </div>
 
-                <!-- Alerts Panel -->
-                <div class="industrial-card p-0 rounded overflow-hidden flex flex-col">
-                    <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
-                        <h3 class="font-bold text-slate-700">Active Alerts</h3>
-                        <span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-0.5 rounded">3 Active</span>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 industrial-card p-5 rounded">
+                        <h3 class="font-bold text-slate-700 mb-4">Line A Energy Profile</h3>
+                        <div class="h-64">
+                            <canvas id="lineAChart"></canvas>
+                        </div>
                     </div>
-                    <div class="overflow-y-auto flex-1 h-72 scroller p-2 space-y-2">
-                        
-                        <!-- Alert Item Critical -->
-                        <div class="border-l-4 border-red-500 bg-white p-3 shadow-sm rounded-r border border-slate-100">
-                            <div class="flex justify-between items-start mb-1">
-                                <span class="text-red-700 font-bold text-xs uppercase tracking-wider">Critical</span>
-                                <span class="text-slate-400 text-xs">10:45 AM</span>
+                    <div class="industrial-card p-5 rounded">
+                        <h3 class="font-bold text-slate-700 mb-4">OEE & Efficiency</h3>
+                        <div class="flex flex-col gap-6">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1"><span>Availability</span><span class="font-bold">94%</span></div>
+                                <div class="w-full bg-slate-200 h-2 rounded-full"><div class="bg-blue-600 h-2 rounded-full" style="width: 94%"></div></div>
                             </div>
-                            <p class="text-sm font-medium text-slate-800">Energy Spike Detected</p>
-                            <p class="text-xs text-slate-500">Production Line A exceeds threshold by 15%.</p>
-                            <div class="mt-2 text-xs text-blue-600 cursor-pointer hover:underline">View Diagnostics ></div>
-                        </div>
-
-                        <!-- Alert Item Warning -->
-                        <div class="border-l-4 border-yellow-500 bg-white p-3 shadow-sm rounded-r border border-slate-100">
-                            <div class="flex justify-between items-start mb-1">
-                                <span class="text-yellow-700 font-bold text-xs uppercase tracking-wider">Warning</span>
-                                <span class="text-slate-400 text-xs">10:12 AM</span>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1"><span>Performance</span><span class="font-bold">88%</span></div>
+                                <div class="w-full bg-slate-200 h-2 rounded-full"><div class="bg-blue-600 h-2 rounded-full" style="width: 88%"></div></div>
                             </div>
-                            <p class="text-sm font-medium text-slate-800">Efficiency Drop</p>
-                            <p class="text-xs text-slate-500">HVAC Unit 3 operating below optimal curve.</p>
-                        </div>
-
-                        <!-- Alert Item Info -->
-                        <div class="border-l-4 border-blue-500 bg-white p-3 shadow-sm rounded-r border border-slate-100">
-                            <div class="flex justify-between items-start mb-1">
-                                <span class="text-blue-700 font-bold text-xs uppercase tracking-wider">Info</span>
-                                <span class="text-slate-400 text-xs">08:00 AM</span>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1"><span>Quality</span><span class="font-bold">99%</span></div>
+                                <div class="w-full bg-slate-200 h-2 rounded-full"><div class="bg-green-500 h-2 rounded-full" style="width: 99%"></div></div>
                             </div>
-                            <p class="text-sm font-medium text-slate-800">System Calibration</p>
-                            <p class="text-xs text-slate-500">Daily AI model retraining completed.</p>
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded mt-2">
+                                <div class="text-xs text-slate-500 uppercase font-bold">Specific Energy Consumption</div>
+                                <div class="text-xl font-mono font-bold text-slate-800 mt-1">0.42 <span class="text-sm text-slate-400">kWh/unit</span></div>
+                            </div>
                         </div>
-
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- HISTORICAL DATA TABLE -->
-            <div class="industrial-card rounded overflow-hidden">
-                <div class="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
-                    <h3 class="font-bold text-slate-700">Hourly Consumption Log</h3>
-                    <div class="flex gap-2">
-                        <select class="text-xs border border-slate-300 rounded px-2 py-1 bg-white">
-                            <option>Last 24 Hours</option>
-                            <option>Last 7 Days</option>
-                        </select>
-                        <button class="text-xs text-blue-600 hover:underline">Download CSV</button>
+            <!-- 3. PRODUCTION LINE B -->
+            <section id="page-line-b" class="page-section">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-2xl font-bold text-slate-800">Production Line B</h2>
+                            <span class="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-bold rounded border border-yellow-200">MAINTENANCE REQ</span>
+                        </div>
+                        <p class="text-sm text-slate-500 mt-1">Packaging & Logistics Unit - Zone 2</p>
                     </div>
                 </div>
-                <div class="overflow-x-auto">
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 industrial-card p-5 rounded">
+                        <h3 class="font-bold text-slate-700 mb-4">Line B Energy Profile</h3>
+                        <div class="h-64">
+                            <canvas id="lineBChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="industrial-card p-5 rounded">
+                        <h3 class="font-bold text-slate-700 mb-4">OEE & Efficiency</h3>
+                        <div class="flex flex-col gap-6">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1"><span>Availability</span><span class="font-bold text-yellow-600">72%</span></div>
+                                <div class="w-full bg-slate-200 h-2 rounded-full"><div class="bg-yellow-500 h-2 rounded-full" style="width: 72%"></div></div>
+                            </div>
+                            <div class="p-4 bg-red-50 border border-red-200 rounded mt-2">
+                                <div class="text-xs text-red-700 uppercase font-bold flex items-center gap-2">
+                                    <i class="fa-solid fa-triangle-exclamation"></i> Anomaly Detected
+                                </div>
+                                <div class="text-sm text-slate-700 mt-2">Compressor idle load is 15% higher than baseline. Suggests air leak.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. PEAK ANALYSIS -->
+            <section id="page-peak" class="page-section">
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">Peak Load Analysis</h2>
+                <p class="text-sm text-slate-500 mb-6">Historical peak tracking and AI forecasting.</p>
+
+                <div class="industrial-card p-6 rounded mb-6">
+                    <h3 class="font-bold text-slate-700 mb-4">24-Hour Load Distribution</h3>
+                    <div class="h-64">
+                        <canvas id="peakChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="industrial-card p-4 rounded bg-slate-50">
+                        <div class="text-xs text-slate-500 font-bold uppercase">Highest Peak (Today)</div>
+                        <div class="text-lg font-mono font-bold text-slate-800 mt-1">10:45 AM</div>
+                        <div class="text-sm text-red-600 font-medium">480 kW</div>
+                    </div>
+                    <div class="industrial-card p-4 rounded bg-slate-50">
+                        <div class="text-xs text-slate-500 font-bold uppercase">AI Forecast (Tomorrow)</div>
+                        <div class="text-lg font-mono font-bold text-slate-800 mt-1">02:15 PM</div>
+                        <div class="text-sm text-purple-600 font-medium">Est. 495 kW</div>
+                    </div>
+                    <div class="industrial-card p-4 rounded bg-slate-50">
+                        <div class="text-xs text-slate-500 font-bold uppercase">Load Shifting Opportunity</div>
+                        <div class="text-sm text-slate-700 mt-1">Shift "Kiln Pre-heat" to <span class="font-bold">04:00 AM</span> to save approx <span class="text-green-600 font-bold">$210</span>.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. AI DIAGNOSTICS -->
+            <section id="page-ai" class="page-section">
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">AI System Diagnostics</h2>
+                <p class="text-sm text-slate-500 mb-6">Automated anomaly detection log.</p>
+
+                <div class="industrial-card rounded overflow-hidden">
                     <table class="w-full text-left text-sm text-slate-600">
-                        <thead class="bg-slate-100 text-slate-500 uppercase text-xs font-bold border-b border-slate-200">
+                        <thead class="bg-slate-100 text-slate-500 text-xs font-bold uppercase border-b border-slate-200">
                             <tr>
-                                <th class="px-6 py-3">Timestamp</th>
-                                <th class="px-6 py-3">Machine / Zone</th>
-                                <th class="px-6 py-3">Consumption (kWh)</th>
-                                <th class="px-6 py-3">AI Prediction (kWh)</th>
-                                <th class="px-6 py-3">Variance</th>
-                                <th class="px-6 py-3">Status</th>
+                                <th class="p-4">ID</th>
+                                <th class="p-4">Timestamp</th>
+                                <th class="p-4">Severity</th>
+                                <th class="p-4">Anomaly</th>
+                                <th class="p-4">Probable Cause (AI)</th>
+                                <th class="p-4">Recommended Action</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-200 bg-white" id="dataTableBody">
-                            <!-- JS will populate this -->
-                            <tr>
-                                <td class="px-6 py-3 font-mono">2023-10-27 13:00</td>
-                                <td class="px-6 py-3">Line A - Press</td>
-                                <td class="px-6 py-3 font-medium text-slate-800">124.5</td>
-                                <td class="px-6 py-3 text-slate-500">122.0</td>
-                                <td class="px-6 py-3 text-red-500 font-bold">+2.0%</td>
-                                <td class="px-6 py-3"><span class="px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-xs font-bold">Investigate</span></td>
+                        <tbody class="divide-y divide-slate-200">
+                            <tr class="hover:bg-red-50/50">
+                                <td class="p-4 font-mono text-slate-400">#AI-892</td>
+                                <td class="p-4 font-mono">10:45:02</td>
+                                <td class="p-4"><span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold">CRITICAL</span></td>
+                                <td class="p-4 font-medium text-slate-800">Energy Spike (+62%)</td>
+                                <td class="p-4">Simultaneous startup of Motors A & B</td>
+                                <td class="p-4"><button class="text-blue-600 hover:underline">Schedule Staggered Start</button></td>
                             </tr>
                             <tr>
-                                <td class="px-6 py-3 font-mono">2023-10-27 12:00</td>
-                                <td class="px-6 py-3">Line A - Press</td>
-                                <td class="px-6 py-3 font-medium text-slate-800">118.2</td>
-                                <td class="px-6 py-3 text-slate-500">119.0</td>
-                                <td class="px-6 py-3 text-green-500 font-bold">-0.6%</td>
-                                <td class="px-6 py-3"><span class="px-2 py-1 rounded bg-green-100 text-green-800 text-xs font-bold">Normal</span></td>
+                                <td class="p-4 font-mono text-slate-400">#AI-891</td>
+                                <td class="p-4 font-mono">10:12:15</td>
+                                <td class="p-4"><span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">WARNING</span></td>
+                                <td class="p-4 font-medium text-slate-800">Efficiency Drift</td>
+                                <td class="p-4">HVAC Filter Degradation</td>
+                                <td class="p-4"><button class="text-blue-600 hover:underline">Create Maintenance Ticket</button></td>
                             </tr>
                             <tr>
-                                <td class="px-6 py-3 font-mono">2023-10-27 11:00</td>
-                                <td class="px-6 py-3">Line A - Press</td>
-                                <td class="px-6 py-3 font-medium text-slate-800">115.0</td>
-                                <td class="px-6 py-3 text-slate-500">115.5</td>
-                                <td class="px-6 py-3 text-green-500 font-bold">-0.4%</td>
-                                <td class="px-6 py-3"><span class="px-2 py-1 rounded bg-green-100 text-green-800 text-xs font-bold">Normal</span></td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-3 font-mono">2023-10-27 10:45</td>
-                                <td class="px-6 py-3 font-bold">Line A - Press</td>
-                                <td class="px-6 py-3 font-bold text-red-600">185.0</td>
-                                <td class="px-6 py-3 text-slate-500">114.0</td>
-                                <td class="px-6 py-3 text-red-600 font-bold">+62.2%</td>
-                                <td class="px-6 py-3"><span class="px-2 py-1 rounded bg-red-100 text-red-800 text-xs font-bold animate-pulse">CRITICAL SPIKE</span></td>
+                                <td class="p-4 font-mono text-slate-400">#AI-890</td>
+                                <td class="p-4 font-mono">08:00:00</td>
+                                <td class="p-4"><span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold">INFO</span></td>
+                                <td class="p-4 font-medium text-slate-800">System Optimization</td>
+                                <td class="p-4">Baseline Recalibration</td>
+                                <td class="p-4 text-slate-400">Auto-completed</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-            </div>
-            
-            <footer class="mt-6 text-center text-xs text-slate-400 pb-4">
-                &copy; 2025 EnergySense AI Solutions. All rights reserved. <br>
-                <!-- STRATEJİK DEĞİŞİKLİK 4: Industry 4.0 Uyumluluk Notu -->
-                System Version: 2.4.0 (Build 892) | Designed for Industry 4.0 compliant energy management systems.
+            </section>
+
+            <!-- 6. HISTORICAL DATA -->
+            <section id="page-history" class="page-section">
+                <div class="flex justify-between items-end mb-6">
+                    <h2 class="text-2xl font-bold text-slate-800">Historical Consumption Data</h2>
+                    <div class="flex gap-2">
+                        <input type="date" class="border border-slate-300 rounded text-sm px-2 py-1">
+                        <span class="text-slate-400 self-center">-</span>
+                        <input type="date" class="border border-slate-300 rounded text-sm px-2 py-1">
+                        <button class="bg-slate-200 text-slate-700 px-3 py-1 rounded text-sm font-medium hover:bg-slate-300">Filter</button>
+                    </div>
+                </div>
+
+                <div class="industrial-card rounded overflow-hidden">
+                    <table class="w-full text-left text-sm text-slate-600">
+                        <thead class="bg-slate-100 text-slate-500 text-xs font-bold uppercase border-b border-slate-200">
+                            <tr>
+                                <th class="p-4">Date</th>
+                                <th class="p-4">Time</th>
+                                <th class="p-4">Total Load (kWh)</th>
+                                <th class="p-4">Line A (kWh)</th>
+                                <th class="p-4">Line B (kWh)</th>
+                                <th class="p-4">Cost ($)</th>
+                                <th class="p-4">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 bg-white" id="history-table-body">
+                            <!-- JS will populate rows -->
+                        </tbody>
+                    </table>
+                    <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-center">
+                        <button class="text-xs text-blue-600 font-medium hover:underline">Load More Records...</button>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="mt-8 text-center text-xs text-slate-400 pb-4 border-t border-slate-200 pt-4">
+                EnergySense AI v3.0 | Industry 4.0 Compliant Architecture | <span class="text-slate-500">Authorized Personnel Only</span>
             </footer>
 
         </main>
     </div>
 
+    <!-- JAVASCRIPT LOGIC -->
     <script>
-        // --- INDUSTRIAL CLOCK ---
-        function updateClock() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('en-US', { hour12: false });
-            document.getElementById('last-sync').textContent = timeString;
+        // --- 1. NAVIGATION LOGIC (SPA) ---
+        function switchPage(pageId) {
+            // Hide all sections
+            document.querySelectorAll('.page-section').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Show target section
+            document.getElementById('page-' + pageId).classList.add('active');
+
+            // Update Navigation Styles
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.getElementById('nav-' + pageId).classList.add('active');
         }
-        setInterval(updateClock, 1000);
-        updateClock();
 
-        // --- CHART JS SETUP ---
-        const ctx = document.getElementById('energyChart').getContext('2d');
-        
-        // Data Configuration
-        const labels = ['08:00', '09:00', '10:00', '10:45', '11:00', '12:00', '13:00', '14:00', '15:00'];
-        const actualData = [320, 340, 335, 480, 330, 310, 350, 360, 345]; // Spike at 10:45
-        const aiPrediction = [325, 335, 340, 345, 335, 320, 345, 355, 350]; // Smooth curve
+        // --- 2. CLOCK ---
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', { hour12: false });
+        }, 1000);
 
-        let energyChart = new Chart(ctx, {
+        // --- 3. CHART INITIALIZATION ---
+        // We use a function to init charts so variables don't conflict
+
+        // Common Chart Options
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            elements: { line: { tension: 0.3 } },
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false } },
+                y: { beginAtZero: false, grid: { color: '#f1f5f9' } }
+            }
+        };
+
+        // Overview Chart
+        new Chart(document.getElementById('overviewChart'), {
             type: 'line',
             data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Actual Consumption (kWh)',
-                        data: actualData,
-                        borderColor: '#3b82f6', // Blue-500
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        pointBackgroundColor: (context) => {
-                            // Highlight the spike in red
-                            const value = context.raw;
-                            return value > 400 ? '#ef4444' : '#3b82f6';
-                        },
-                        pointRadius: (context) => {
-                            const value = context.raw;
-                            return value > 400 ? 6 : 3;
-                        },
-                        fill: true
-                    },
-                    {
-                        label: 'AI Baseline Prediction',
-                        data: aiPrediction,
-                        borderColor: '#a855f7', // Purple-500
-                        borderWidth: 2,
-                        borderDash: [5, 5], // Dashed line for prediction
-                        tension: 0.4,
-                        pointRadius: 0,
-                        fill: false
-                    }
-                ]
+                labels: ['08:00', '09:00', '10:00', '10:45', '11:00', '12:00', '13:00', '14:00'],
+                datasets: [{
+                    label: 'Load (kW)',
+                    data: [320, 340, 335, 480, 330, 310, 350, 360],
+                    borderColor: '#2563eb', // Blue-600
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    fill: true,
+                    borderWidth: 2,
+                    pointBackgroundColor: ['#2563eb', '#2563eb', '#2563eb', '#dc2626', '#2563eb', '#2563eb', '#2563eb', '#2563eb'],
+                    pointRadius: [3, 3, 3, 6, 3, 3, 3, 3]
+                }]
+            },
+            options: commonOptions
+        });
+
+        // Line A Chart
+        new Chart(document.getElementById('lineAChart'), {
+            type: 'line',
+            data: {
+                labels: ['1h', '2h', '3h', '4h', '5h', '6h'],
+                datasets: [{
+                    label: 'Line A Load',
+                    data: [120, 125, 122, 128, 124, 126],
+                    borderColor: '#16a34a', // Green-600
+                    borderWidth: 2,
+                    fill: false
+                }]
+            },
+            options: commonOptions
+        });
+
+        // Line B Chart (Shows Instability)
+        new Chart(document.getElementById('lineBChart'), {
+            type: 'line',
+            data: {
+                labels: ['1h', '2h', '3h', '4h', '5h', '6h'],
+                datasets: [{
+                    label: 'Line B Load',
+                    data: [90, 92, 145, 130, 95, 93],
+                    borderColor: '#ca8a04', // Yellow-600
+                    borderWidth: 2,
+                    fill: false
+                }]
+            },
+            options: commonOptions
+        });
+
+        // Peak Analysis Chart (Bar)
+        new Chart(document.getElementById('peakChart'), {
+            type: 'bar',
+            data: {
+                labels: ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00'],
+                datasets: [{
+                    label: 'Avg Load',
+                    data: [300, 420, 310, 360, 340, 290],
+                    backgroundColor: '#cbd5e1'
+                }, {
+                    label: 'Peak Load',
+                    data: [320, 480, 330, 380, 350, 300],
+                    backgroundColor: '#3b82f6'
+                }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                },
-                plugins: {
-                    legend: {
-                        display: false // Using custom legend in HTML
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                        titleFont: { family: 'Inter', size: 13 },
-                        bodyFont: { family: 'Inter', size: 12 },
-                        padding: 10,
-                        cornerRadius: 4,
-                        displayColors: true
-                    },
-                    annotation: {
-                        // Advanced feature placeholder
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        grid: {
-                            color: '#e2e8f0',
-                            borderDash: [2, 2]
-                        },
-                        title: {
-                            display: true,
-                            text: 'Load (kWh)',
-                            font: { size: 11, weight: 'bold' }
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
+                ...commonOptions,
+                plugins: { legend: { display: true } }
             }
         });
 
-        // --- SIMULATION LOGIC ---
-        function simulateNewData() {
-            // Simulate adding a new data point
-            const lastLabel = labels[labels.length - 1];
-            const hour = parseInt(lastLabel.split(':')[0]) + 1;
-            const newLabel = `${hour}:00`;
-            
-            // Random fluctuations
-            const baseLoad = 340;
-            const fluctuation = Math.floor(Math.random() * 40) - 20;
-            const newVal = baseLoad + fluctuation;
-            const predVal = baseLoad + (Math.random() * 10 - 5);
+        // --- 4. POPULATE HISTORICAL TABLE (Simulation) ---
+        const historyTable = document.getElementById('history-table-body');
+        const statuses = ['Normal', 'Normal', 'Peak Warning', 'Normal', 'Efficiency Low'];
+        const statusColors = ['text-green-600', 'text-green-600', 'text-red-600 font-bold', 'text-green-600', 'text-yellow-600'];
 
-            // Update Arrays
-            if (labels.length > 10) {
-                labels.shift();
-                actualData.shift();
-                aiPrediction.shift();
-            }
-            labels.push(newLabel);
-            actualData.push(newVal);
-            aiPrediction.push(predVal);
-
-            energyChart.update();
-            
-            // Update Timestamp
-            document.getElementById('last-sync').textContent = new Date().toLocaleTimeString('en-US', { hour12: false });
+        for (let i = 0; i < 5; i++) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                    <td class="p-4 font-mono">2023-10-27</td>
+                    <td class="p-4 font-mono">${14 - i}:00</td>
+                    <td class="p-4 font-medium">${300 + Math.floor(Math.random() * 100)}</td>
+                    <td class="p-4 text-slate-500">${100 + Math.floor(Math.random() * 20)}</td>
+                    <td class="p-4 text-slate-500">${100 + Math.floor(Math.random() * 20)}</td>
+                    <td class="p-4 font-mono">$${45 + Math.floor(Math.random() * 10)}</td>
+                    <td class="p-4 ${statusColors[i]}">${statuses[i]}</td>
+                `;
+            historyTable.appendChild(row);
         }
 
     </script>
